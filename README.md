@@ -14,7 +14,7 @@ The structure of each activity is as follows (Can be flexible in file naming):
 .
 ├── exercises
 │   ├── serialParallelTests.C              # This is what gets compiled (mentioned in Make/files)
-│   ├── testClass.C                        # Also mentioned in Make/files
+│   ├── testClass.C                        # This is what you modify (Also mentioned in Make/files)
 │   └── testClass.H
 ├── Make
 │   ├── files                              # What C++ implementation files to compile
