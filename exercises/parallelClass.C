@@ -19,6 +19,22 @@ Foam::labelList Foam::parallelClass::run() const
     // Use blocking P2P communication API
     labelList res;
     
+    // For completeness
+    res.append(lst_);
+
+	if (Pstream::master()) {
+        for (int s=Pstream::firstSlave(); s<=Pstream::lastSlave(); s++)
+        {
+			labelList lst;
+			IPstream fromSlave(Pstream::blocking, s);
+			fromSlave >> lst;
+            res.append(lst);
+        }
+    } else {
+		OPstream toMaster(Pstream::blocking,  Pstream::masterNo());
+        toMaster << lst_;
+    }
+
     return res;
 }
 
