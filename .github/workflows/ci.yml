@@ -1,0 +1,35 @@
+# This is a basic workflow to run in FOAM-Extend 5 containers
+name: FE5
+
+# Make sure shells are interactive, so OF can get sourced
+defaults:
+  run:
+    shell: bash -o pipefail -i {0}
+
+on:
+  push
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/foamscience/jammy-openfoam:fe5
+      options: --cpus 2 --user openfoam
+      env:
+        CATCH_TIMEOUT: 20
+
+    steps:
+      - name: Checkout activity branch
+        uses: actions/checkout@v3
+
+      - name: Compile and Test
+        run: |
+          source /opt/foam-extend-5.0/etc/bashrc
+          git clone https://github.com/FoamScience/OpenFOAM-Unit-testing --branch=fe5 ut
+          rm -rf ut/tests/serialParallelTests ut/tests/Make
+          ln -s "$PWD/exercises" "$PWD/ut/tests/serialParallelTests"
+          ln -s "$PWD/Make" "$PWD/ut/tests/Make"
+          ls ut/tests/Make ut/tests/serialParallelTests
+          cd ut
+          sed -i 's/mpirun/mpirun --oversubscribe/g' Alltest
+          ./Alltest

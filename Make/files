@@ -1,0 +1,6 @@
+testsTestDriver.C
+
+serialParallelTests/parallelClass.C
+serialParallelTests/serialParalleTest.C
+
+EXE = testsTestDriver
