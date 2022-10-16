@@ -26,7 +26,7 @@ prepareTimePaths();
 
 TEST_CASE
 (
-    "Parallel comms for custom data types",
+    "Parallel comms for custom data types - advanced",
     "[Serial][Parallel][Case_cavity]"
 )
 {
@@ -49,24 +49,25 @@ TEST_CASE
     );
     auto& mesh = meshPtr();
 
-    SECTION("Compatibility of Edge with List") {
+    SECTION("Compatibility of Edge with IDLList") {
     
         // Create a list of edges
-        List<Edge> edges(Pstream::nProcs());
+        Edge e(mesh, 1);
+        IDLList<Edge> edges;
+        edges.append(e.clone().ptr());
 
         // This has nothing to do with OpenFOAM
         CAPTURE(Pstream::parRun(), Pstream::myProcNo());
 
-        REQUIRE(edges.size() == Pstream::nProcs());
+        REQUIRE(edges.size() == 1);
     }
 
     SECTION("Compatibility of Edge with *Pstreams") {
     
         // Create an Edge
-        Edge e(0,0);
+        Edge e(mesh,0);
         if (Pstream::master()) {
             e.destination = 2;
-            e.weight = .15;
         }
 
         Pstream::scatter(e);
@@ -75,27 +76,24 @@ TEST_CASE
         CAPTURE(Pstream::parRun(), Pstream::myProcNo());
 
         REQUIRE(e.destination == 2);
-        REQUIRE(e.weight == .15);
     }
 
     SECTION("A graph of edges") {
-    
-        List<List<Edge>> g = Edge::collectEdges(mesh);
+        List<IDLList<Edge>> g = Edge::collectEdges(mesh);
 
-        Edge e00(1,0);
-        Edge e10(2,0);
-        List<Edge> e0; e0.append(e00); e0.append(e10);
-        //e0.append(e10); e0.append(e11);
-        Edge e20(0,0);
-        Edge e30(3,0);
-        List<Edge> e2; e2.append(e20); e2.append(e30);
-        List<List<Edge>> expectedG;
+        Edge e00(mesh,1);
+        Edge e10(mesh,2);
+        IDLList<Edge> e0; e0.append(e00.clone().ptr()); e0.append(e10.clone().ptr());
+        Edge e20(mesh,0);
+        Edge e30(mesh,3);
+        IDLList<Edge> e2; e2.append(e20.clone().ptr()); e2.append(e30.clone().ptr());
+        List<IDLList<Edge>> expectedG;
         expectedG.append(e0);
         expectedG.append(e2);
         expectedG.append(e2);
         expectedG.append(e0);
             
-        if (Pstream::parRun()) {
+        if (Pstream::parRun() && Pstream::master()) {
             REQUIRE(g == expectedG);
         }
     }
