@@ -21,6 +21,7 @@ Istream&  operator>>(Istream& is, Edge& e);
 
 struct Edge {
     // Constructors
+    Edge() {};
     Edge(const label& d, const scalar& s) : destination(d), weight(s) {};
 
     // Member operators

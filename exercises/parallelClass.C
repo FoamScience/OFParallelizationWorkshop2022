@@ -8,10 +8,13 @@ namespace Foam
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Ostream&  operator<<(Ostream& os, const Edge& e) {
+    os << e.destination << " " << e.weight;
     return os;
 }
 
 Istream&  operator>>(Istream& is, Edge& e) {
+    is >> e.destination;
+    is >> e.weight;
     return is;
 }
 
