@@ -7,64 +7,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::parallelClass::next(label n, label& i) const
+scalar Foam::parallelClass::run() const
 {
-    bool res;
-    label rangeMax = int(std::sqrt(n))+1;
+    // This function must send v0 from proc 0 to proc 1
+    // and v1 from proc 1 to proc 0;
 
-    // moves i to next possible divisor in local process range;
-    // which is a "contagious" portion of (3, n)
-    // and it's the whole (3, n) range in serial
+    // And return v1 on proc 0, and v0 on proc 1
+    scalar res = -1;
+    scalar v0, v1 = -1;
 
-    if (Pstream::parRun()) {
-        label length = int(rangeMax/Pstream::nProcs())+1;
-        label start = std::max(3, Pstream::myProcNo()*length);
-        label end = std::min((Pstream::myProcNo()+1)*length, rangeMax);
-        
-        if (i < start) {
-            i = start;
-            res = true;
-        } else if (i <= end) {
-            ++i;
-            res = true;
-        }
-
-        if (i >= end) res = false;
-    } else {
-        if (i<2) {
-            i = 2;
-            res = true;
-        } else if (i <= rangeMax) {
-            i++;
-            res = true;
-        }
-        if (i>rangeMax) res = false;
-    }
-
-    return res;
-}
-
-bool Foam::parallelClass::isPrime(label n) const
-{
-    // This function must return:
-    // true if n is a prime number
-    // false otherwise
-
-    if (n == 2) return true;
-    if (n % 2 == 0) return false;
-
-    // This is serial code, use P2P comms to distribute the work
-    bool res = true;
-
-    // last possible divisor
-    label rangeMax = int(std::sqrt(n))+1;
-    for(label i = 3; i <= rangeMax; i++)
-    {
-        if (n % i == 0) {
-            res = false;
-            break;
-        }
-    }
 
     return res;
 }
