@@ -27,7 +27,7 @@ jobs:
           source /opt/foam-extend-5.0/etc/bashrc
           git clone https://github.com/FoamScience/OpenFOAM-Unit-testing --branch=fe5 ut
           rm -rf ut/tests/serialParallelTests ut/tests/Make
-          ln -s "$PWD/serialParallelTests" "$PWD/ut/tests/serialParallelTests"
+          ln -s "$PWD/exercises" "$PWD/ut/tests/serialParallelTests"
           ln -s "$PWD/Make" "$PWD/ut/tests/Make"
           ls ut/tests/Make ut/tests/serialParallelTests
           cd ut
