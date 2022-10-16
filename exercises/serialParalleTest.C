@@ -26,7 +26,7 @@ prepareTimePaths();
 
 TEST_CASE
 (
-    "Blocking P2P comms - find prime numbers",
+    "Non-Blocking P2P comms",
     "[Parallel][Case_cavity]"
 )
 {

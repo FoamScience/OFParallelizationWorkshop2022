@@ -18,6 +18,19 @@ void Foam::parallelClass::swapLists()
         const auto& patches = mesh_.boundaryMesh();
         labelList neis = this->neis();
 
+        // Initiate sends
+        for(auto& nei: neis) {
+            OPstream toNei(Pstream::nonBlocking, nei);
+            toNei << lists_[nei];
+        }
+
+        Pstream::waitRequests();
+
+        // Receive all things
+        for(auto& nei: neis) {
+            IPstream fromNei(Pstream::nonBlocking, nei);
+            lists_[nei] = labelList(fromNei);
+        }
     }
 }
 
