@@ -26,8 +26,8 @@ prepareTimePaths();
 
 TEST_CASE
 (
-    "Blocking P2P comms - find prime numbers",
-    "[Parallel][Case_cavity]"
+    "Collective comms - reference cells",
+    "[Serial][Parallel][Case_cavity]"
 )
 {
     // Turn this on if you want to see FATAL ERROR msgs
@@ -49,7 +49,7 @@ TEST_CASE
     );
     auto& mesh = meshPtr();
 
-    SECTION("run() sends info between two processes simultaneously") {
+    SECTION("Check if reference point is in global mesh") {
     
         // Create a sample object and run the method
         parallelClass p(mesh);
@@ -57,11 +57,35 @@ TEST_CASE
         // This has nothing to do with OpenFOAM
         CAPTURE(Pstream::parRun(), Pstream::myProcNo());
     
-        p.swapLists();
+        // Position at proc 2
+        vector pos(.0975, .0025, 0);
+        label isInside = p.checkPosition(pos);
 
-        for(auto& nei: p.neis())
-        {
-            REQUIRE(p.list(nei) == labelList(10, nei));
+        REQUIRE(isInside == true);
+
+        // Position outside the mesh
+        vector out(1, 1, 0);
+        label isOutside = !p.checkPosition(out);
+
+        REQUIRE(isOutside == true);
+    }
+
+    SECTION("Get procID of owning process if position is inside the mesh") {
+    
+        // Create a sample object and run the method
+        parallelClass p(mesh);
+
+        // This has nothing to do with OpenFOAM
+        CAPTURE(Pstream::parRun(), Pstream::myProcNo());
+    
+        // Position at proc 2
+        vector pos(.0975, .0025, 0);
+        label id = p.whoHasReferenceCell(pos);
+
+        if (Pstream::parRun()) {
+            REQUIRE(id == 1);
+        } else {
+            REQUIRE(id == 0);
         }
     }
 
