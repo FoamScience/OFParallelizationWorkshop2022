@@ -28,7 +28,8 @@ public:
     ~parallelClass() {};
 
     // Member methods
-    labelList run() const;
+    inline bool next(label n, label& i) const;
+    bool isPrime(label n) const;
 
 protected:
     // Member variables
