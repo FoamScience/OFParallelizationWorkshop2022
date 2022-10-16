@@ -7,17 +7,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar Foam::parallelClass::run() const
+void Foam::parallelClass::swapLists()
 {
-    // This function must send v0 from proc 0 to proc 1
-    // and v1 from proc 1 to proc 0;
+    // This function must send lists_[neiProcID] to neighbouring processor
+    // and put it in lists_[myProcID] there
 
-    // And return v1 on proc 0, and v0 on proc 1
-    scalar res = -1;
-    scalar v0, v1 = -1;
+    // This function will not be tested for serial runs
 
+    if (Pstream::parRun) {
+        const auto& patches = mesh_.boundaryMesh();
+        labelList neis = this->neis();
 
-    return res;
+    }
 }
 
 }
