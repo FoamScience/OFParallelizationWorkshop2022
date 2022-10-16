@@ -16,6 +16,40 @@ scalar Foam::parallelClass::run() const
     scalar res = -1;
     scalar v0, v1 = -1;
 
+    if (Pstream::parRun()) {
+        if (Pstream::master()) {
+            v0 = 200;
+            {
+                // Send to slave
+                OPstream toSlave(Pstream::blocking, Pstream::firstSlave());
+                toSlave << v0;
+            }
+
+            {
+                // Receive from slave
+                IPstream fromSlave(Pstream::blocking, Pstream::firstSlave());
+                res = readScalar(fromSlave);
+            }
+        } else {
+            if (Pstream::myProcNo() == Pstream::firstSlave())
+            {
+                {
+                    // Receive from master
+                    IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+                    res = readScalar(fromMaster);
+                }
+
+                {
+                    // Send to master
+                    v1 = 100;
+                    OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+                    toMaster << v1;
+                }
+            }
+        }
+    } else {
+        res = 100;
+    }
 
     return res;
 }
