@@ -7,20 +7,26 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::parallelClass::checkPosition(const vector& position) const
-{
-    // This function must return true if the position is inside the global mesh
-    // and false otherwise
-
-    return false;
+Ostream&  operator<<(Ostream& os, const Edge& e) {
+    return os;
 }
 
-Foam::label Foam::parallelClass::whoHasReferenceCell(const vector& position) const
-{
-    // This function must return the process ID where the cell associated with
-    // position is at; and -1 if position is outside the global mesh
+Istream&  operator>>(Istream& is, Edge& e) {
+    return is;
+}
 
-    return -1;
+List<List<Edge>> Edge::collectEdges(const fvMesh& mesh) {
+        List<List<Edge>> g(Pstream::nProcs());
+        forAll(mesh.boundaryMesh(), pi) {
+            const auto* patch = dynamic_cast<const processorPolyPatch*>(&mesh.boundaryMesh()[pi]);
+            if (patch) {
+                Edge e(patch->neighbProcNo(), 0);
+                g[Pstream::myProcNo()].append(e);
+            }
+        }
+        Pstream::gatherList(g);
+        Pstream::scatterList(g);
+        return g;
 }
 
 }

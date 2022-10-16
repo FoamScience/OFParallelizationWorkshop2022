@@ -11,30 +11,34 @@
 namespace Foam
 {
 
-class parallelClass
-{
-public:
+class Edge;
+
+Ostream& operator<<(Ostream& os, const Edge& e);
+Istream& operator>>(Istream& os, Edge& e);
+
+struct Edge;
+Istream&  operator>>(Istream& is, Edge& e);
+
+struct Edge {
     // Constructors
-    parallelClass(const fvMesh& mesh)
-    :
-        mesh_(mesh)
-    {};
-    parallelClass(parallelClass &&) = default;
-    parallelClass(const parallelClass &) = default;
-    // Assignment/Move operators
-    parallelClass &operator=(parallelClass &&) = default;
-    parallelClass &operator=(const parallelClass &) = default;
-    // Destructor
-    ~parallelClass() {};
+    Edge(const label& d, const scalar& s) : destination(d), weight(s) {};
+
+    // Member operators
+    bool operator==(const Edge& ej) const {
+        return destination == ej.destination;
+    }
+    bool operator!=(const Edge& ej) const {
+        return destination != ej.destination;
+    }
+
+    // Build a graph of edges "between processes"
+    static List<List<Edge>> collectEdges(const fvMesh&);
 
     // Member methods
-    bool checkPosition(const vector&) const;
-    label whoHasReferenceCell(const vector&) const;
-
-protected:
-    // Member variables
-    const fvMesh& mesh_;
+    label destination;
+    scalar weight;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

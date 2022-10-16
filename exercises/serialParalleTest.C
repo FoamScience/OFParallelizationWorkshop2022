@@ -26,7 +26,7 @@ prepareTimePaths();
 
 TEST_CASE
 (
-    "Collective comms - reference cells",
+    "Parallel comms for custom data types",
     "[Serial][Parallel][Case_cavity]"
 )
 {
@@ -49,43 +49,54 @@ TEST_CASE
     );
     auto& mesh = meshPtr();
 
-    SECTION("Check if reference point is in global mesh") {
+    SECTION("Compatibility of Edge with List") {
     
-        // Create a sample object and run the method
-        parallelClass p(mesh);
+        // Create a list of edges
+        List<Edge> edges(Pstream::nProcs());
 
         // This has nothing to do with OpenFOAM
         CAPTURE(Pstream::parRun(), Pstream::myProcNo());
-    
-        // Position at proc 2
-        vector pos(.0975, .0025, 0);
-        label isInside = p.checkPosition(pos);
 
-        REQUIRE(isInside == true);
-
-        // Position outside the mesh
-        vector out(1, 1, 0);
-        label isOutside = !p.checkPosition(out);
-
-        REQUIRE(isOutside == true);
+        REQUIRE(edges.size() == Pstream::nProcs());
     }
 
-    SECTION("Get procID of owning process if position is inside the mesh") {
+    SECTION("Compatibility of Edge with *Pstreams") {
     
-        // Create a sample object and run the method
-        parallelClass p(mesh);
+        // Create an Edge
+        Edge e(0,0);
+        if (Pstream::master()) {
+            e.destination = 2;
+            e.weight = .15;
+        }
 
+        Pstream::scatter(e);
+        
         // This has nothing to do with OpenFOAM
         CAPTURE(Pstream::parRun(), Pstream::myProcNo());
-    
-        // Position at proc 2
-        vector pos(.0975, .0025, 0);
-        label id = p.whoHasReferenceCell(pos);
 
+        REQUIRE(e.destination == 2);
+        REQUIRE(e.weight == .15);
+    }
+
+    SECTION("A graph of edges") {
+    
+        List<List<Edge>> g = Edge::collectEdges(mesh);
+
+        Edge e00(1,0);
+        Edge e10(2,0);
+        List<Edge> e0; e0.append(e00); e0.append(e10);
+        //e0.append(e10); e0.append(e11);
+        Edge e20(0,0);
+        Edge e30(3,0);
+        List<Edge> e2; e2.append(e20); e2.append(e30);
+        List<List<Edge>> expectedG;
+        expectedG.append(e0);
+        expectedG.append(e2);
+        expectedG.append(e2);
+        expectedG.append(e0);
+            
         if (Pstream::parRun()) {
-            REQUIRE(id == 1);
-        } else {
-            REQUIRE(id == 0);
+            REQUIRE(g == expectedG);
         }
     }
 
