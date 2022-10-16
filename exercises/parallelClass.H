@@ -55,6 +55,33 @@ struct Edge
     label destination;
     const fvMesh& mesh;
 
+    // This is used to construct from Istream
+    // on another mesh
+    class iNew
+    {
+        // Private data
+        const fvMesh& mesh_;
+
+
+    public:
+
+        iNew(const fvMesh& m)
+        :
+            mesh_(m)
+        {}
+
+        autoPtr<Edge> operator()(Istream& is) const
+        {
+            return autoPtr<Edge>
+            (
+                new Edge
+                (
+                    mesh_,
+                    is
+                )
+            );
+        }
+    };
 };
 
 
