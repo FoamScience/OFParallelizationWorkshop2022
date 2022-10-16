@@ -7,66 +7,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::parallelClass::next(label n, label& i) const
+bool Foam::parallelClass::checkPosition(const vector& position) const
 {
-    bool res;
-    label rangeMax = int(std::sqrt(n))+1;
+    // This function must return true if the position is inside the global mesh
+    // and false otherwise
 
-    // moves i to next possible divisor in local process range;
-    // which is a "contagious" portion of (3, n)
-    // and it's the whole (3, n) range in serial
-
-    if (Pstream::parRun()) {
-        label length = int(rangeMax/Pstream::nProcs())+1;
-        label start = std::max(3, Pstream::myProcNo()*length);
-        label end = std::min((Pstream::myProcNo()+1)*length, rangeMax);
-        
-        if (i < start) {
-            i = start;
-            res = true;
-        } else if (i <= end) {
-            ++i;
-            res = true;
-        }
-
-        if (i >= end) res = false;
-    } else {
-        if (i<2) {
-            i = 2;
-            res = true;
-        } else if (i <= rangeMax) {
-            i++;
-            res = true;
-        }
-        if (i>rangeMax) res = false;
-    }
-
-    return res;
+    return false;
 }
 
-bool Foam::parallelClass::isPrime(label n) const
+Foam::label Foam::parallelClass::whoHasReferenceCell(const vector& position) const
 {
-    // This function must return:
-    // true if n is a prime number
-    // false otherwise
+    // This function must return the process ID where the cell associated with
+    // position is at; and -1 if position is outside the global mesh
 
-    if (n == 2) return true;
-    if (n % 2 == 0) return false;
-
-    // This is serial code, use P2P comms to distribute the work
-    bool res = true;
-
-    // last possible divisor
-    label rangeMax = int(std::sqrt(n))+1;
-    for(label i = 3; i <= rangeMax; i++)
-    {
-        if (n % i == 0) {
-            res = false;
-            break;
-        }
-    }
-
-    return res;
+    return -1;
 }
 
 }

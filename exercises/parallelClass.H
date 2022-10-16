@@ -4,6 +4,7 @@
 #include "Pstream.H"
 #include "labelList.H"
 #include "fvMesh.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -16,7 +17,6 @@ public:
     // Constructors
     parallelClass(const fvMesh& mesh)
     :
-        lst_(Pstream::myProcNo(), Pstream::myProcNo()),
         mesh_(mesh)
     {};
     parallelClass(parallelClass &&) = default;
@@ -28,12 +28,11 @@ public:
     ~parallelClass() {};
 
     // Member methods
-    inline bool next(label n, label& i) const;
-    bool isPrime(label n) const;
+    bool checkPosition(const vector&) const;
+    label whoHasReferenceCell(const vector&) const;
 
 protected:
     // Member variables
-	labelList lst_;
     const fvMesh& mesh_;
 };
 
