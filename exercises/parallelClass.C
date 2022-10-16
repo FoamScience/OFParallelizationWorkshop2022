@@ -17,19 +17,17 @@ bool Foam::parallelClass::next(label n, label& i) const
     // and it's the whole (3, n) range in serial
 
     if (Pstream::parRun()) {
-        label length = int(rangeMax/Pstream::nProcs())+1;
-        label start = std::max(3, Pstream::myProcNo()*length);
-        label end = std::min((Pstream::myProcNo()+1)*length, rangeMax);
+        label start = 3+Pstream::myProcNo();
         
         if (i < start) {
             i = start;
             res = true;
-        } else if (i <= end) {
-            ++i;
+        } else if (i <= rangeMax) {
+            i += Pstream::nProcs();
             res = true;
         }
 
-        if (i >= end) res = false;
+        if (i >= rangeMax) res = false;
     } else {
         if (i<2) {
             i = 2;
@@ -58,7 +56,7 @@ bool Foam::parallelClass::isPrime(label n) const
 
     // last possible divisor
     label rangeMax = int(std::sqrt(n))+1;
-    for(label i = 3; i <= rangeMax; i++)
+    for(label i = next(n,i) ; next(n, i); )
     {
         if (n % i == 0) {
             res = false;
@@ -66,6 +64,8 @@ bool Foam::parallelClass::isPrime(label n) const
         }
     }
 
+    reduce(res, andOp<bool>());
+    
     return res;
 }
 
