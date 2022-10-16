@@ -27,7 +27,7 @@ prepareTimePaths();
 TEST_CASE
 (
     "Blocking P2P comms - find prime numbers",
-    "[Serial][Parallel][Case_cavity]"
+    "[Parallel][Case_cavity]"
 )
 {
     // Turn this on if you want to see FATAL ERROR msgs
@@ -55,16 +55,14 @@ TEST_CASE
         parallelClass p(mesh);
 
         // This has nothing to do with OpenFOAM
-        CAPTURE(Pstream::parRun());
+        CAPTURE(Pstream::parRun(), Pstream::myProcNo());
     
-        scalar result = p.run();
-        if (Pstream::master()) {
-            REQUIRE(result == 100);
-        }
-        if (Pstream::myProcNo() == 1) {
-            REQUIRE(result == 200);
-        }
+        p.swapLists();
 
+        for(auto& nei: p.neis())
+        {
+            REQUIRE(p.list(nei) == labelList(10, nei));
+        }
     }
 
     // Do not forget to clear the mesh every time!
