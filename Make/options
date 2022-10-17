@@ -1,7 +1,7 @@
-include $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)/mplib$(WM_MPLIB)
+include $(GENERAL_RULES)/mpi-rules
 
 EXE_INC = $(PFLAGS) $(PINC) -std=c++14 \
-    -I$(LIB_SRC)/foam/lnInclude \
+    -I$(LIB_SRC)/OpenFOAM/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(FOAM_USER_LIBBIN)/catch2/include\
@@ -9,7 +9,7 @@ EXE_INC = $(PFLAGS) $(PINC) -std=c++14 \
     
 EXE_LIBS = \
     $(PLIBS) \
-    -lfoam \
+    -lOpenFOAM \
     -lfiniteVolume \
     -lmeshTools \
     -L$(FOAM_USER_LIBBIN)/catch2/lib -l:libCatch2.a
