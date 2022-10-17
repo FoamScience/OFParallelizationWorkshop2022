@@ -1,5 +1,5 @@
-# This is a basic workflow to run in FOAM-Extend 5 containers
-name: FE5
+# This is a basic workflow to run in OpenFOAM ESI containers
+name: OF2206
 
 # Make sure shells are interactive, so OF can get sourced
 defaults:
@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/foamscience/jammy-openfoam:fe5
+      image: ghcr.io/foamscience/jammy-openfoam:v2206
       options: --cpus 2 --user openfoam
       env:
         CATCH_TIMEOUT: 20
@@ -24,10 +24,10 @@ jobs:
 
       - name: Compile and Test
         run: |
-          source /opt/foam-extend-5.0/etc/bashrc
-          git clone https://github.com/FoamScience/OpenFOAM-Unit-testing --branch=fe5 ut
+          source /usr/lib/openfoam/openfoam2206/etc/bashrc
+          git clone https://github.com/FoamScience/OpenFOAM-Unit-testing --branch=of2206 ut
           rm -rf ut/tests/serialParallelTests ut/tests/Make
-          ln -s "$PWD/serialParallelTests" "$PWD/ut/tests/serialParallelTests"
+          ln -s "$PWD/exercises" "$PWD/ut/tests/serialParallelTests"
           ln -s "$PWD/Make" "$PWD/ut/tests/Make"
           ls ut/tests/Make ut/tests/serialParallelTests
           cd ut
