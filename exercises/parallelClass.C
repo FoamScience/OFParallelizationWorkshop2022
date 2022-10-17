@@ -21,13 +21,13 @@ scalar Foam::parallelClass::run() const
             v0 = 200;
             {
                 // Send to slave
-                OPstream toSlave(Pstream::blocking, Pstream::firstSlave());
+                OPstream toSlave(Pstream::commsTypes::blocking, Pstream::firstSlave());
                 toSlave << v0;
             }
 
             {
                 // Receive from slave
-                IPstream fromSlave(Pstream::blocking, Pstream::firstSlave());
+                IPstream fromSlave(Pstream::commsTypes::blocking, Pstream::firstSlave());
                 res = readScalar(fromSlave);
             }
         } else {
@@ -35,14 +35,14 @@ scalar Foam::parallelClass::run() const
             {
                 {
                     // Receive from master
-                    IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+                    IPstream fromMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
                     res = readScalar(fromMaster);
                 }
 
                 {
                     // Send to master
                     v1 = 100;
-                    OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+                    OPstream toMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
                     toMaster << v1;
                 }
             }
