@@ -14,8 +14,7 @@ void Foam::parallelClass::swapLists()
 
     // This function will not be tested for serial runs
 
-    if (Pstream::parRun) {
-        const auto& patches = mesh_.boundaryMesh();
+    if (Pstream::parRun()) {
         labelList neis = this->neis();
 
     }
