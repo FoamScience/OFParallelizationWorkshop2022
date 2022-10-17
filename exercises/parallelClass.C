@@ -14,21 +14,21 @@ void Foam::parallelClass::swapLists()
 
     // This function will not be tested for serial runs
 
-    if (Pstream::parRun) {
-        const auto& patches = mesh_.boundaryMesh();
+    if (Pstream::parRun()) {
         labelList neis = this->neis();
 
         // Initiate sends
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
         for(auto& nei: neis) {
-            OPstream toNei(Pstream::nonBlocking, nei);
+            UOPstream toNei(nei, pBufs);
             toNei << lists_[nei];
         }
 
-        Pstream::waitRequests();
+        pBufs.finishedSends();
 
         // Receive all things
         for(auto& nei: neis) {
-            IPstream fromNei(Pstream::nonBlocking, nei);
+            UIPstream fromNei(nei, pBufs);
             lists_[nei] = labelList(fromNei);
         }
     }
