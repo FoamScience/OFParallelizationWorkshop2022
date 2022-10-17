@@ -61,9 +61,14 @@ TEST_CASE
         parallelClass p(mesh);
         labelList res = p.run();
 
+        labelList lCorrect;
+        forAll(correctSizes, ci) {
+            lCorrect.append(correctSizes[ci]);
+        }
+
         // Compare to expected on master only
         if (Pstream::master()) {
-            REQUIRE(res == labelList(correctSizes.begin(), correctSizes.end()));
+            REQUIRE(res == lCorrect);
         }
     }
 
