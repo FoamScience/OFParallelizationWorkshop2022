@@ -63,7 +63,10 @@ TEST_CASE
 
         // Compare to expected on master only
         if (Pstream::master()) {
-            REQUIRE(res == labelList(correctSizes.begin(), correctSizes.end()));
+            REQUIRE
+            (
+                std::vector<label>(res.begin(), res.end()) == correctSizes
+            );
         }
     }
 
